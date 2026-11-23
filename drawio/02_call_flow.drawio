@@ -1,0 +1,67 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="call_flow" id="call_flow">
+    <mxGraphModel dx="900" dy="500" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="800" pageHeight="640" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="One call of a filesystem made by make_filesystem" style="text;html=1;fontSize=18;align=left;verticalAlign=middle;whiteSpace=nowrap;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="12" width="740" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="call" value="filesystem.file_size(path)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="30" y="60" width="300" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="log" value="logger(log_t)&lt;br&gt;skipped when empty" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="30" y="150" width="300" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="std" value="std::filesystem::file_size(path)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="30" y="250" width="300" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="ok" value="the result goes to the caller" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="480" y="245" width="300" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="err" value="on_error(filesystem_error)&lt;br&gt;skipped when empty" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="30" y="380" width="300" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="empty" value="the call returns a value-initialized result: 0, an empty path, no entries, false, ..." style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="20" y="500" width="320" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="leave" value="that exception leaves the call" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="430" y="500" width="300" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="n" value="A call that does not fail runs only the logger and std::filesystem. The logger runs even when the call fails." style="text;html=1;fontSize=16;align=left;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="400" y="60" width="380" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1" style="endArrow=classic;html=1;strokeWidth=1.5;" edge="1" parent="1" source="call" target="log">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2" style="endArrow=classic;html=1;strokeWidth=1.5;" edge="1" parent="1" source="log" target="std">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e3" style="endArrow=classic;html=1;strokeWidth=1.5;" edge="1" parent="1" source="std" target="ok">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="l3" value="returns" style="text;html=1;fontSize=16;align=center;verticalAlign=bottom;whiteSpace=nowrap;" vertex="1" parent="1">
+          <mxGeometry x="335" y="249" width="140" height="22" as="geometry"/>
+        </mxCell>
+        <mxCell id="e4" style="endArrow=classic;html=1;strokeWidth=1.5;" edge="1" parent="1" source="std" target="err">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="l4" value="throws filesystem_error" style="text;html=1;fontSize=16;align=left;verticalAlign=middle;whiteSpace=nowrap;" vertex="1" parent="1">
+          <mxGeometry x="190" y="327" width="260" height="26" as="geometry"/>
+        </mxCell>
+        <mxCell id="e5" style="endArrow=classic;html=1;strokeWidth=1.5;" edge="1" parent="1" source="err" target="empty">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="l5" value="returns" style="text;html=1;fontSize=16;align=left;verticalAlign=middle;whiteSpace=nowrap;" vertex="1" parent="1">
+          <mxGeometry x="190" y="457" width="120" height="26" as="geometry"/>
+        </mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=classic;html=1;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="err" target="leave">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="l6" value="throws" style="text;html=1;fontSize=16;align=center;verticalAlign=bottom;whiteSpace=nowrap;" vertex="1" parent="1">
+          <mxGeometry x="340" y="384" width="100" height="22" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

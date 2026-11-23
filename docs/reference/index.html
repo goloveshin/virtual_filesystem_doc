@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://goloveshin.github.io/virtual_filesystem_doc/reference/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Reference - virtual_filesystem</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Reference";
+        var mkdocs_page_input_path = "reference.md";
+        var mkdocs_page_url = "/virtual_filesystem_doc/reference/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> virtual_filesystem
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">The problem</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Getting started</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guide</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../faking/">Replacing calls in a test</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../errors/">Errors and logging</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../queries/">Queries</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../list/">Listing a directory</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../bytes/">File bytes and content_filter</a>
+                  </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Reference</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#aliases-and-values">Aliases and values</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#entry_t">entry_t</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#list_options_t-and-list_t">list_options_t and list_t</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#filesystem_t">filesystem_t</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#examining">Examining</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#paths">Paths</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#changing">Changing</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#listing">Listing</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#file-bytes">File bytes</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#make_filesystem">make_filesystem</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#log_t">log_t</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#operation_et">operation_et</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#apply_content_filter">apply_content_filter</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#queries">Queries</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#cmake">CMake</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">virtual_filesystem</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Reference</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">&para;</a></h1>
+<p>The header is <code>&lt;virtual_filesystem/filesystem.hpp&gt;</code>. Everything is in <code>namespace virtual_filesystem</code>. The headers in <code>detail</code> are included only from it.</p>
+<p>Every member of <code>filesystem_t</code> can throw <code>std::filesystem::filesystem_error</code>. A filesystem from <code>make_filesystem</code> passes it to <code>on_error</code> instead, see <a href="../errors/">Errors and logging</a>.</p>
+<p>The suffixes: <code>_t</code> a type, <code>_ft</code> a <code>std::function</code>, <code>_et</code> an enumeration, <code>_ot</code> a <code>std::optional</code>.</p>
+<h2 id="aliases-and-values">Aliases and values<a class="headerlink" href="#aliases-and-values" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>name</th>
+<th>type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fs</code></td>
+<td><code>namespace fs = std::filesystem</code></td>
+</tr>
+<tr>
+<td><code>path_t</code></td>
+<td><code>std::filesystem::path</code></td>
+</tr>
+<tr>
+<td><code>bytes_t</code></td>
+<td><code>std::string</code>, the bytes of a file</td>
+</tr>
+<tr>
+<td><code>bytes_ot</code></td>
+<td><code>std::optional&lt;bytes_t&gt;</code></td>
+</tr>
+<tr>
+<td><code>entries_t</code></td>
+<td><code>std::vector&lt;entry_t&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="entry_t"><code>entry_t</code><a class="headerlink" href="#entry_t" title="Permanent link">&para;</a></h3>
+<pre><code class="language-cpp">struct entry_t
+{
+    path_t path;
+    fs::file_status status;          // follows a symlink
+    fs::file_status symlink_status;  // does not
+};
+</code></pre>
+<p>One directory entry, captured when it was listed.</p>
+<h3 id="list_options_t-and-list_t"><code>list_options_t</code> and <code>list_t</code><a class="headerlink" href="#list_options_t-and-list_t" title="Permanent link">&para;</a></h3>
+<pre><code class="language-cpp">struct list_options_t
+{
+    bool recursive = false;
+    bool follow_directory_symlink = false;
+    bool skip_permission_denied = false;
+};
+
+struct list_t
+{
+    path_t root;
+    list_options_t options = {};
+};
+</code></pre>
+<p>See <a href="../list/">Listing a directory</a>.</p>
+<h2 id="filesystem_t"><code>filesystem_t</code><a class="headerlink" href="#filesystem_t" title="Permanent link">&para;</a></h2>
+<pre><code class="language-cpp">struct filesystem_t;
+</code></pre>
+<p>Every member is a <code>std::function</code>. A default-constructed <code>filesystem_t</code> has every member empty, and calling an empty member throws <code>std::bad_function_call</code>.</p>
+<h3 id="examining">Examining<a class="headerlink" href="#examining" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>member</th>
+<th>signature</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>status</code></td>
+<td><code>file_status (const path_t&amp;)</code></td>
+<td>the file status, a symlink is followed. A missing file is <code>not_found</code></td>
+</tr>
+<tr>
+<td><code>symlink_status</code></td>
+<td><code>file_status (const path_t&amp;)</code></td>
+<td>the status, a symlink is not followed</td>
+</tr>
+<tr>
+<td><code>file_size</code></td>
+<td><code>uintmax_t (const path_t&amp;)</code></td>
+<td>the size in bytes</td>
+</tr>
+<tr>
+<td><code>hard_link_count</code></td>
+<td><code>uintmax_t (const path_t&amp;)</code></td>
+<td>the number of hard links</td>
+</tr>
+<tr>
+<td><code>last_write_time</code></td>
+<td><code>file_time_type (const path_t&amp;)</code></td>
+<td>the time of the last write</td>
+</tr>
+<tr>
+<td><code>space</code></td>
+<td><code>space_info (const path_t&amp;)</code></td>
+<td><code>capacity</code>, <code>free</code>, <code>available</code></td>
+</tr>
+<tr>
+<td><code>equivalent</code></td>
+<td><code>bool (const equivalent_t&amp;)</code></td>
+<td><code>true</code> when <code>path_1</code> and <code>path_2</code> name the same file</td>
+</tr>
+<tr>
+<td><code>read_symlink</code></td>
+<td><code>path_t (const path_t&amp;)</code></td>
+<td>the target of a symlink</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-cpp">struct equivalent_t
+{
+    path_t path_1;
+    path_t path_2;
+};
+</code></pre>
+<h3 id="paths">Paths<a class="headerlink" href="#paths" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>member</th>
+<th>signature</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>current_path</code></td>
+<td><code>path_t ()</code></td>
+<td>the current directory</td>
+</tr>
+<tr>
+<td><code>set_current_path</code></td>
+<td><code>void (const path_t&amp;)</code></td>
+<td>changes the current directory</td>
+</tr>
+<tr>
+<td><code>absolute</code></td>
+<td><code>path_t (const path_t&amp;)</code></td>
+<td>the absolute path</td>
+</tr>
+<tr>
+<td><code>canonical</code></td>
+<td><code>path_t (const path_t&amp;)</code></td>
+<td>the absolute path without symlinks, <code>.</code> and <code>..</code>. The file must exist</td>
+</tr>
+<tr>
+<td><code>weakly_canonical</code></td>
+<td><code>path_t (const path_t&amp;)</code></td>
+<td>the same, and the file may be missing</td>
+</tr>
+<tr>
+<td><code>temp_directory</code></td>
+<td><code>path_t ()</code></td>
+<td>the directory for temporary files</td>
+</tr>
+</tbody>
+</table>
+<h3 id="changing">Changing<a class="headerlink" href="#changing" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>member</th>
+<th>signature</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>create_directory</code></td>
+<td><code>bool (const path_t&amp;)</code></td>
+<td><code>true</code> when the directory was created</td>
+</tr>
+<tr>
+<td><code>create_directories</code></td>
+<td><code>bool (const path_t&amp;)</code></td>
+<td><code>true</code> when at least one directory was created</td>
+</tr>
+<tr>
+<td><code>remove</code></td>
+<td><code>bool (const path_t&amp;)</code></td>
+<td><code>true</code> when the file or the empty directory was removed</td>
+</tr>
+<tr>
+<td><code>remove_all</code></td>
+<td><code>uintmax_t (const path_t&amp;)</code></td>
+<td>how many files and directories were removed</td>
+</tr>
+<tr>
+<td><code>rename</code></td>
+<td><code>void (const rename_t&amp;)</code></td>
+<td>moves <code>from</code> to <code>to</code></td>
+</tr>
+<tr>
+<td><code>resize_file</code></td>
+<td><code>void (const resize_file_t&amp;)</code></td>
+<td>changes the size of a file</td>
+</tr>
+<tr>
+<td><code>copy</code></td>
+<td><code>void (const copy_t&amp;)</code></td>
+<td>copies <code>from</code> to <code>to</code></td>
+</tr>
+<tr>
+<td><code>create_symlink</code></td>
+<td><code>void (const create_symlink_t&amp;)</code></td>
+<td>makes a link <code>link</code> to <code>target</code></td>
+</tr>
+<tr>
+<td><code>create_directory_symlink</code></td>
+<td><code>void (const create_symlink_t&amp;)</code></td>
+<td>the same, for a directory target</td>
+</tr>
+<tr>
+<td><code>create_hard_link</code></td>
+<td><code>void (const create_hard_link_t&amp;)</code></td>
+<td>makes a hard link</td>
+</tr>
+<tr>
+<td><code>permissions</code></td>
+<td><code>void (const permissions_t&amp;)</code></td>
+<td>changes the permissions</td>
+</tr>
+<tr>
+<td><code>set_last_write_time</code></td>
+<td><code>void (const set_last_write_time_t&amp;)</code></td>
+<td>sets the time of the last write</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-cpp">struct rename_t { path_t from; path_t to; };
+struct resize_file_t { path_t path; std::uintmax_t new_size = 0; };
+struct copy_t { path_t from; path_t to; fs::copy_options options = fs::copy_options::none; };
+struct create_symlink_t { path_t target; path_t link; };
+struct create_hard_link_t { path_t target; path_t link; };
+struct permissions_t
+{
+    path_t path;
+    fs::perms permissions = fs::perms::none;
+    fs::perm_options options = fs::perm_options::replace;
+};
+struct set_last_write_time_t { path_t path; fs::file_time_type time; };
+</code></pre>
+<p><code>copy_options</code> selects recursion, overwrite, and how symlinks are copied, the same as in <code>std::filesystem::copy</code>.</p>
+<h3 id="listing">Listing<a class="headerlink" href="#listing" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>member</th>
+<th>signature</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>list</code></td>
+<td><code>entries_t (const list_t&amp;)</code></td>
+<td>the entries of a directory</td>
+</tr>
+</tbody>
+</table>
+<p>See <a href="../list/">Listing a directory</a>.</p>
+<h3 id="file-bytes">File bytes<a class="headerlink" href="#file-bytes" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>member</th>
+<th>signature</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>try_read</code></td>
+<td><code>bytes_ot (const path_t&amp;)</code></td>
+<td>the bytes, or an empty optional when the file cannot be opened. Not an error</td>
+</tr>
+<tr>
+<td><code>read</code></td>
+<td><code>bytes_t (const path_t&amp;)</code></td>
+<td>the bytes. An error when the file cannot be opened</td>
+</tr>
+<tr>
+<td><code>write</code></td>
+<td><code>void (const write_t&amp;)</code></td>
+<td>replaces the bytes of the file</td>
+</tr>
+<tr>
+<td><code>content_filter</code></td>
+<td><code>bytes_t (const path_t&amp;, const bytes_t&amp;, content_filter_direction_et)</code></td>
+<td>changes the bytes on the way, see <a href="../bytes/">File bytes and content_filter</a></td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-cpp">struct write_t
+{
+    path_t path;
+    bytes_t bytes;
+};
+
+enum class content_filter_direction_et { READ, WRITE };
+</code></pre>
+<p>See <a href="../bytes/">File bytes and content_filter</a>.</p>
+<h2 id="make_filesystem"><code>make_filesystem</code><a class="headerlink" href="#make_filesystem" title="Permanent link">&para;</a></h2>
+<pre><code class="language-cpp">struct make_filesystem_t
+{
+    logger_ft logger;
+    error_ft on_error;
+    content_filter_ft content_filter;
+};
+
+filesystem_t make_filesystem(const make_filesystem_t&amp;);
+</code></pre>
+<p>Fills every member from <code>std::filesystem</code>. <code>try_read</code>, <code>read</code> and <code>write</code> use <code>std::ifstream</code> and <code>std::ofstream</code> in binary mode.</p>
+<table>
+<thead>
+<tr>
+<th>field</th>
+<th>type</th>
+<th>meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>logger</code></td>
+<td><code>std::function&lt;void (const log_t&amp;)&gt;</code></td>
+<td>runs before every call. An empty one is skipped</td>
+</tr>
+<tr>
+<td><code>on_error</code></td>
+<td><code>std::function&lt;void (const fs::filesystem_error&amp;)&gt;</code></td>
+<td>receives a <code>filesystem_error</code> of a call. An empty one is skipped</td>
+</tr>
+<tr>
+<td><code>content_filter</code></td>
+<td><code>content_filter_ft</code></td>
+<td>applied to <code>try_read</code>, <code>read</code> and <code>write</code>. An empty one leaves the bytes as they are</td>
+</tr>
+</tbody>
+</table>
+<p>When <code>on_error</code> returns, the call returns a value-initialized result. When <code>on_error</code> throws, that exception leaves the call. See <a href="../errors/">Errors and logging</a>.</p>
+<h3 id="log_t"><code>log_t</code><a class="headerlink" href="#log_t" title="Permanent link">&para;</a></h3>
+<pre><code class="language-cpp">struct log_t
+{
+    operation_et operation = operation_et::STATUS;
+    path_t path;
+    path_t other;
+};
+</code></pre>
+<p><code>path</code> is the file the call names. <code>other</code> is set when the call names two paths: <code>RENAME</code>, <code>COPY</code>, <code>CREATE_SYMLINK</code>, <code>CREATE_DIRECTORY_SYMLINK</code>, <code>CREATE_HARD_LINK</code> and <code>EQUIVALENT</code>.</p>
+<h3 id="operation_et"><code>operation_et</code><a class="headerlink" href="#operation_et" title="Permanent link">&para;</a></h3>
+<pre><code class="language-cpp">enum class operation_et
+{
+    STATUS, SYMLINK_STATUS, FILE_SIZE, HARD_LINK_COUNT, LAST_WRITE_TIME, SPACE,
+    EQUIVALENT, READ_SYMLINK,
+    CURRENT_PATH, SET_CURRENT_PATH, ABSOLUTE_PATH, CANONICAL, WEAKLY_CANONICAL, TEMP_DIRECTORY,
+    CREATE_DIRECTORY, CREATE_DIRECTORIES, REMOVE, REMOVE_ALL, RENAME, RESIZE_FILE, COPY,
+    CREATE_SYMLINK, CREATE_DIRECTORY_SYMLINK, CREATE_HARD_LINK, PERMISSIONS, SET_LAST_WRITE_TIME,
+    LIST, TRY_READ, READ, WRITE
+};
+</code></pre>
+<p>One value for each member of <code>filesystem_t</code> except <code>content_filter</code>. <code>ABSOLUTE_PATH</code> is not named <code>ABSOLUTE</code>: <code>wingdi.h</code> defines that macro.</p>
+<h2 id="apply_content_filter"><code>apply_content_filter</code><a class="headerlink" href="#apply_content_filter" title="Permanent link">&para;</a></h2>
+<pre><code class="language-cpp">void apply_content_filter(filesystem_t&amp;);
+</code></pre>
+<p>Wraps <code>try_read</code>, <code>read</code> and <code>write</code> of the filesystem with its <code>content_filter</code>. An empty filter changes nothing. <code>make_filesystem</code> calls it before it returns; call it yourself only for a <code>filesystem_t</code> that you filled by hand, and only once.</p>
+<h2 id="queries">Queries<a class="headerlink" href="#queries" title="Permanent link">&para;</a></h2>
+<p>Free functions over the members. Every one takes <code>const filesystem_t&amp;</code> and a path, and is <code>inline</code>. See <a href="../queries/">Queries</a>.</p>
+<table>
+<thead>
+<tr>
+<th>function</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bool exists(filesystem, path)</code></td>
+<td><code>status(path)</code> is not <code>none</code> and not <code>not_found</code></td>
+</tr>
+<tr>
+<td><code>bool is_regular_file(filesystem, path)</code></td>
+<td><code>status(path)</code> is <code>regular</code></td>
+</tr>
+<tr>
+<td><code>bool is_directory(filesystem, path)</code></td>
+<td><code>status(path)</code> is <code>directory</code></td>
+</tr>
+<tr>
+<td><code>bool is_block_file(filesystem, path)</code></td>
+<td><code>status(path)</code> is <code>block</code></td>
+</tr>
+<tr>
+<td><code>bool is_character_file(filesystem, path)</code></td>
+<td><code>status(path)</code> is <code>character</code></td>
+</tr>
+<tr>
+<td><code>bool is_fifo(filesystem, path)</code></td>
+<td><code>status(path)</code> is <code>fifo</code></td>
+</tr>
+<tr>
+<td><code>bool is_socket(filesystem, path)</code></td>
+<td><code>status(path)</code> is <code>socket</code></td>
+</tr>
+<tr>
+<td><code>bool is_other(filesystem, path)</code></td>
+<td>the file exists and is not regular, not a directory and not a symlink</td>
+</tr>
+<tr>
+<td><code>bool is_symlink(filesystem, path)</code></td>
+<td><code>symlink_status(path)</code> is <code>symlink</code></td>
+</tr>
+<tr>
+<td><code>bool is_empty(filesystem, path)</code></td>
+<td>a directory has no entries, or a file has size 0</td>
+</tr>
+<tr>
+<td><code>path_t relative(filesystem, path, base)</code></td>
+<td><code>lexically_relative</code> of the weakly canonical paths</td>
+</tr>
+<tr>
+<td><code>path_t proximate(filesystem, path, base)</code></td>
+<td><code>lexically_proximate</code> of the weakly canonical paths</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cmake">CMake<a class="headerlink" href="#cmake" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>name</th>
+<th>meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>virtual_filesystem::virtual_filesystem</code></td>
+<td>the static library target, with the include directory and C++20</td>
+</tr>
+<tr>
+<td><code>VIRTUAL_FILESYSTEM_BUILD_TESTS</code></td>
+<td>builds the unit tests and the example. <code>ON</code> only for the top-level project</td>
+</tr>
+</tbody>
+</table>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../bytes/" class="btn btn-neutral float-left" title="File bytes and content_filter"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p>Distributed under the Boost Software License, Version 1.0.</p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/goloveshin/virtual_filesystem_doc" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../bytes/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

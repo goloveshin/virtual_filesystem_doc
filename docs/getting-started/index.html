@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://goloveshin.github.io/virtual_filesystem_doc/getting-started/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Getting started - virtual_filesystem</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Getting started";
+        var mkdocs_page_input_path = "getting-started.md";
+        var mkdocs_page_url = "/virtual_filesystem_doc/getting-started/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> virtual_filesystem
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">The problem</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Getting started</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#cmake">CMake</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#the-first-program">The first program</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#the-example-and-the-tests">The example and the tests</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guide</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../faking/">Replacing calls in a test</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../errors/">Errors and logging</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../queries/">Queries</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../list/">Listing a directory</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../bytes/">File bytes and content_filter</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../reference/">Reference</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">virtual_filesystem</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Getting started</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h1>
+<h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
+<ul>
+<li>C++20. The library builds its arguments with designated initializers (<code>{.logger = ..., .on_error = ...}</code>), and the examples of this documentation use them everywhere.</li>
+<li>A compiler with <code>std::filesystem</code>: GCC, Clang and MSVC are tested.</li>
+</ul>
+<p>The library is a static library, not header-only: <code>make_filesystem</code> is in <code>src/std_filesystem.cpp</code>. The target is <code>virtual_filesystem::virtual_filesystem</code>. It carries the include directory and the C++20 requirement.</p>
+<h2 id="cmake">CMake<a class="headerlink" href="#cmake" title="Permanent link">&para;</a></h2>
+<p>The library lives at <a href="https://github.com/goloveshin/virtual_filesystem">github.com/goloveshin/virtual_filesystem</a>. Fetch it with <code>FetchContent</code>:</p>
+<pre><code class="language-cmake">include(FetchContent)
+
+FetchContent_Declare(
+    virtual_filesystem
+    GIT_REPOSITORY https://github.com/goloveshin/virtual_filesystem.git
+    GIT_TAG main
+)
+FetchContent_MakeAvailable(virtual_filesystem)
+
+target_link_libraries(my_app PRIVATE virtual_filesystem::virtual_filesystem)
+</code></pre>
+<p>Replace <code>main</code> with a release tag to pin a version. To use a local copy instead, replace <code>GIT_REPOSITORY</code> and <code>GIT_TAG</code> with <code>SOURCE_DIR &lt;path&gt;</code>.</p>
+<p>Include one header. The headers in <code>detail</code> are not included on their own:</p>
+<pre><code class="language-cpp">#include &lt;virtual_filesystem/filesystem.hpp&gt;
+</code></pre>
+<p>The library has an option <code>VIRTUAL_FILESYSTEM_BUILD_TESTS</code>. It builds the unit tests and the example of the library. It is <code>ON</code> only when <code>virtual_filesystem</code> is the top-level project, so a project that uses the library does not build them. You can set it yourself before <code>FetchContent_MakeAvailable</code>:</p>
+<pre><code class="language-cmake">set(VIRTUAL_FILESYSTEM_BUILD_TESTS OFF)
+</code></pre>
+<h2 id="the-first-program">The first program<a class="headerlink" href="#the-first-program" title="Permanent link">&para;</a></h2>
+<pre><code class="language-cpp">#include &lt;virtual_filesystem/filesystem.hpp&gt;
+
+#include &lt;iostream&gt;
+
+namespace vfs = virtual_filesystem;
+namespace fs = std::filesystem;
+
+
+int main()
+{
+    const auto filesystem = vfs::make_filesystem({
+        .logger = [](const vfs::log_t&amp; log)
+        {
+            std::cout &lt;&lt; &quot;log: &quot; &lt;&lt; log.path.generic_string() &lt;&lt; &quot;\n&quot;;
+        },
+        .on_error = [](const fs::filesystem_error&amp; error)
+        {
+            std::cout &lt;&lt; &quot;error: &quot; &lt;&lt; error.path1().generic_string() &lt;&lt; &quot;\n&quot;;
+        }
+    });
+
+    const vfs::path_t path = &quot;no_such_file.txt&quot;;
+
+    // a missing file is not an error for status
+    const auto is_there = vfs::exists(filesystem, path);
+    std::cout &lt;&lt; std::boolalpha &lt;&lt; &quot;exists: &quot; &lt;&lt; is_there &lt;&lt; &quot;\n&quot;;
+
+    // file_size of a missing file is an error: on_error runs, the result is 0
+    const auto size = filesystem.file_size(path);
+    std::cout &lt;&lt; &quot;size: &quot; &lt;&lt; size &lt;&lt; &quot;\n&quot;;
+}
+</code></pre>
+<p>It prints:</p>
+<pre><code class="language-text">log: no_such_file.txt
+exists: false
+log: no_such_file.txt
+error: no_such_file.txt
+size: 0
+</code></pre>
+<p>What happens here:</p>
+<ol>
+<li><code>make_filesystem</code> returns a <code>filesystem_t</code> whose members call <code>std::filesystem</code>. The <code>logger</code> and <code>on_error</code> functions are held by every member.</li>
+<li><code>exists(filesystem, path)</code> is a free function. It calls <code>filesystem.status(path)</code>, so the logger runs once. A missing file is <code>file_type::not_found</code> and not an error, so <code>on_error</code> does not run.</li>
+<li><code>filesystem.file_size(path)</code> throws <code>std::filesystem::filesystem_error</code> in <code>std::filesystem</code>. Here the library catches it. The logger runs first, then <code>on_error</code> receives the error. Since <code>on_error</code> returns, the call returns <code>0</code>, a value-initialized <code>std::uintmax_t</code>.</li>
+</ol>
+<p>See <a href="../errors/">Errors and logging</a>.</p>
+<h2 id="the-example-and-the-tests">The example and the tests<a class="headerlink" href="#the-example-and-the-tests" title="Permanent link">&para;</a></h2>
+<p>The <code>example/</code> directory of the library has code under test, a filesystem in memory, and a program that checks how they work together. It builds and runs with the tests:</p>
+<pre><code class="language-text">cmake -S . -B build -G Ninja
+cmake --build build
+ctest --test-dir build --output-on-failure
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>file</th>
+<th>what it is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>example/config_loader.hpp</code></td>
+<td>code under test: four functions that take a <code>filesystem_t</code></td>
+</tr>
+<tr>
+<td><code>example/memory_filesystem.hpp</code></td>
+<td><code>memory_t</code>, a fake that keeps files in a <code>std::map</code></td>
+</tr>
+<tr>
+<td><code>example/main.cpp</code></td>
+<td>checks: fakes, queries, errors and logging, file bytes</td>
+</tr>
+</tbody>
+</table>
+<p>The pages of the guide quote this code.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href=".." class="btn btn-neutral float-left" title="The problem"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../faking/" class="btn btn-neutral float-right" title="Replacing calls in a test">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p>Distributed under the Boost Software License, Version 1.0.</p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/goloveshin/virtual_filesystem_doc" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href=".." style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../faking/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

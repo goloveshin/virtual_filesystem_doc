@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://goloveshin.github.io/virtual_filesystem_doc/faking/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Replacing calls in a test - virtual_filesystem</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Replacing calls in a test";
+        var mkdocs_page_input_path = "faking.md";
+        var mkdocs_page_url = "/virtual_filesystem_doc/faking/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> virtual_filesystem
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">The problem</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Getting started</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guide</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Replacing calls in a test</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#the-code-under-test">The code under test</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#a-partial-fake">A partial fake</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#a-fake-that-fails">A fake that fails</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#replace-one-member-of-a-real-filesystem">Replace one member of a real filesystem</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#a-filesystem-in-memory">A filesystem in memory</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#what-a-fake-should-answer">What a fake should answer</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../errors/">Errors and logging</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../queries/">Queries</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../list/">Listing a directory</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../bytes/">File bytes and content_filter</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../reference/">Reference</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">virtual_filesystem</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Guide</li>
+      <li class="breadcrumb-item active">Replacing calls in a test</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="replacing-calls-in-a-test">Replacing calls in a test<a class="headerlink" href="#replacing-calls-in-a-test" title="Permanent link">&para;</a></h1>
+<p><code>filesystem_t</code> is a struct of <code>std::function</code> members. A test builds one and sets what the code under test needs. The code under test takes <code>const filesystem_t&amp;</code>, so it works the same with the disk, a fake or a log.</p>
+<p><img alt="Every member of filesystem_t is real, fake or empty" src="../images/04_member_slots.svg" /></p>
+<p>The code on this page is in the <code>example/</code> directory of the library: <code>config_loader.hpp</code>, <code>memory_filesystem.hpp</code> and <code>main.cpp</code>.</p>
+<h2 id="the-code-under-test">The code under test<a class="headerlink" href="#the-code-under-test" title="Permanent link">&para;</a></h2>
+<pre><code class="language-cpp">// true when dir has a regular file config.txt
+inline bool has_config(
+    const virtual_filesystem::filesystem_t&amp; filesystem,
+    const virtual_filesystem::path_t&amp; dir
+)
+{
+    return virtual_filesystem::is_regular_file(filesystem, dir / &quot;config.txt&quot;);
+}
+
+// the text of dir/config.txt, or an empty string when there is none
+inline std::string load_config(
+    const virtual_filesystem::filesystem_t&amp; filesystem,
+    const virtual_filesystem::path_t&amp; dir
+)
+{
+    return filesystem.try_read(dir / &quot;config.txt&quot;).value_or(&quot;&quot;);
+}
+</code></pre>
+<p>Nothing here says where the files are. In the program you pass <code>make_filesystem({})</code>. In a test you pass a fake.</p>
+<p><code>has_config</code> ends in a call of <code>status</code>. What happens to that call depends on what the test put in <code>status</code>:</p>
+<p><img alt="The same call meets three kinds of member" src="../images/05_call_outcomes.svg" /></p>
+<p>The next sections show each case.</p>
+<h2 id="a-partial-fake">A partial fake<a class="headerlink" href="#a-partial-fake" title="Permanent link">&para;</a></h2>
+<p>A default-constructed <code>filesystem_t</code> has every member empty. Set only the members that the code under test calls. <code>has_config</code> calls <code>is_regular_file</code>, which calls <code>status</code>, so one member is enough:</p>
+<pre><code class="language-cpp">namespace fs = std::filesystem;
+
+virtual_filesystem::filesystem_t filesystem;
+filesystem.status = [](const virtual_filesystem::path_t&amp; path)
+{
+    return path == &quot;dir/config.txt&quot;
+        ? fs::file_status{fs::file_type::regular}
+        : fs::file_status{fs::file_type::not_found};
+};
+
+example::has_config(filesystem, &quot;dir&quot;);    // true
+example::has_config(filesystem, &quot;other&quot;);  // false
+</code></pre>
+<p>The fake answers by path, so one fake covers many cases.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Calling an empty member throws <code>std::bad_function_call</code>. This is useful in a test: a call that you did not expect fails loudly instead of returning a made-up answer.</p>
+</div>
+<pre><code class="language-cpp">virtual_filesystem::filesystem_t empty;
+empty.file_size(&quot;a&quot;);  // throws std::bad_function_call
+</code></pre>
+<h2 id="a-fake-that-fails">A fake that fails<a class="headerlink" href="#a-fake-that-fails" title="Permanent link">&para;</a></h2>
+<p>A fake can throw <code>std::filesystem::filesystem_error</code>, the exception that <code>std::filesystem</code> throws. The failure reaches the code under test the way a real one would:</p>
+<pre><code class="language-cpp">virtual_filesystem::filesystem_t denied;
+denied.status = [](const virtual_filesystem::path_t&amp; path) -&gt; fs::file_status
+{
+    throw fs::filesystem_error{
+        &quot;status&quot;,
+        path,
+        std::make_error_code(std::errc::permission_denied)
+    };
+};
+
+example::has_config(denied, &quot;dir&quot;);  // throws filesystem_error, path1() is &quot;dir/config.txt&quot;
+</code></pre>
+<p>Without the library a test cannot make "permission denied" without a real file that is locked for the user.</p>
+<p>A filesystem that <code>make_filesystem</code> made catches errors of the real calls; it does not catch the exceptions of a fake that you set afterwards. See <a href="../errors/">Errors and logging</a>.</p>
+<h2 id="replace-one-member-of-a-real-filesystem">Replace one member of a real filesystem<a class="headerlink" href="#replace-one-member-of-a-real-filesystem" title="Permanent link">&para;</a></h2>
+<p><code>make_filesystem</code> returns an ordinary value. Replace a member of it when the rest should stay real:</p>
+<pre><code class="language-cpp">auto filesystem = virtual_filesystem::make_filesystem({});
+filesystem.current_path = []
+{
+    return virtual_filesystem::path_t{&quot;/work&quot;};
+};
+
+filesystem.current_path();  // &quot;/work&quot;, other members still use the disk
+</code></pre>
+<h2 id="a-filesystem-in-memory">A filesystem in memory<a class="headerlink" href="#a-filesystem-in-memory" title="Permanent link">&para;</a></h2>
+<p>When a test reads and writes files, one fake per call becomes long. <code>memory_t</code> of the example is a fake that keeps files in a <code>std::map</code> and fills seven members: <code>status</code>, <code>file_size</code>, <code>create_directories</code>, <code>list</code>, <code>try_read</code>, <code>read</code> and <code>write</code>.</p>
+<pre><code class="language-cpp">struct memory_t
+{
+    std::map&lt;virtual_filesystem::path_t, virtual_filesystem::bytes_t&gt; files;
+
+    virtual_filesystem::filesystem_t filesystem();
+};
+</code></pre>
+<p><img alt="A filesystem in memory: the members work on a std::map" src="../images/06_memory_fake.svg" /></p>
+<p>The members of <code>filesystem()</code> read and write <code>files</code>, so the <code>memory_t</code> must outlive the filesystem. Here is a piece of it, <code>try_read</code> and <code>write</code>:</p>
+<pre><code class="language-cpp">result.try_read = [this](const vfs::path_t&amp; path) -&gt; vfs::bytes_ot
+{
+    const auto found = files.find(path);
+    if (found == files.end())
+    {
+        return {};
+    }
+    return found-&gt;second;
+};
+
+result.write = [this](const vfs::write_t&amp; args)
+{
+    files[args.path] = args.bytes;
+};
+</code></pre>
+<p>A test uses it with the code under test:</p>
+<pre><code class="language-cpp">example::memory_t memory;
+const auto filesystem = memory.filesystem();
+
+example::load_config(filesystem, &quot;dir&quot;);                  // &quot;&quot;: there is no file
+example::save_config(filesystem, &quot;dir&quot;, &quot;mode=fast&quot;);     // writes dir/config.txt
+example::load_config(filesystem, &quot;dir&quot;);                  // &quot;mode=fast&quot;
+example::has_config(filesystem, &quot;dir&quot;);                   // true
+filesystem.file_size(&quot;dir/config.txt&quot;);                   // 9
+</code></pre>
+<p>You can look into <code>memory.files</code> to see what the code wrote, and fill it before the call to prepare input.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code>memory_t</code> is an example, not a part of the library. Directories are not stored. A memory filesystem for your tests should answer the calls your code makes and no more.</p>
+</div>
+<h2 id="what-a-fake-should-answer">What a fake should answer<a class="headerlink" href="#what-a-fake-should-answer" title="Permanent link">&para;</a></h2>
+<p>A fake replaces a call of <code>std::filesystem</code>, so it should answer the way <code>std::filesystem</code> does:</p>
+<ul>
+<li><code>status</code> of a missing file is <code>file_type::not_found</code>. It is not an error.</li>
+<li><code>file_size</code> of a missing file throws <code>filesystem_error</code>.</li>
+<li><code>try_read</code> of a missing file is an empty optional. <code>read</code> of a missing file throws <code>filesystem_error</code>.</li>
+</ul>
+<p>The <a href="../reference/">reference</a> lists the result type of every member.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../getting-started/" class="btn btn-neutral float-left" title="Getting started"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../errors/" class="btn btn-neutral float-right" title="Errors and logging">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p>Distributed under the Boost Software License, Version 1.0.</p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/goloveshin/virtual_filesystem_doc" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../getting-started/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../errors/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

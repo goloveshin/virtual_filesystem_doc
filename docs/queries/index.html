@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://goloveshin.github.io/virtual_filesystem_doc/queries/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Queries - virtual_filesystem</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Queries";
+        var mkdocs_page_input_path = "queries.md";
+        var mkdocs_page_url = "/virtual_filesystem_doc/queries/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> virtual_filesystem
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">The problem</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Getting started</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guide</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../faking/">Replacing calls in a test</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../errors/">Errors and logging</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Queries</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#what-each-query-reads">What each query reads</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#status-and-symlink_status">status and symlink_status</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#is_empty">is_empty</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#relative-and-proximate">relative and proximate</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#errors">Errors</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../list/">Listing a directory</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../bytes/">File bytes and content_filter</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../reference/">Reference</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">virtual_filesystem</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Guide</li>
+      <li class="breadcrumb-item active">Queries</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="queries">Queries<a class="headerlink" href="#queries" title="Permanent link">&para;</a></h1>
+<p><code>exists</code>, <code>is_regular_file</code>, <code>is_directory</code>, <code>is_empty</code>, <code>relative</code> and the other questions that <code>std::filesystem</code> answers are <strong>free functions</strong> of the library. The first argument is the filesystem:</p>
+<pre><code class="language-cpp">virtual_filesystem::exists(filesystem, path);
+virtual_filesystem::is_directory(filesystem, path);
+virtual_filesystem::relative(filesystem, path, base);
+</code></pre>
+<p>They are not members of <code>filesystem_t</code>, because they are rules. Each one is a few lines over the members, and it is the same for every filesystem:</p>
+<ul>
+<li>the disk: <code>make_filesystem</code> fills the members, the rules are the same;</li>
+<li>a fake: the test sets <code>status</code>, and <code>exists</code> answers from it.</li>
+</ul>
+<p>A fake cannot disagree with a rule, because the fake has no way to replace it. A test that says "this path is a directory" sets one <code>status</code>, and <code>is_directory</code>, <code>exists</code>, <code>is_regular_file</code> and <code>is_other</code> all follow.</p>
+<h2 id="what-each-query-reads">What each query reads<a class="headerlink" href="#what-each-query-reads" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>query</th>
+<th>reads</th>
+<th>true when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>exists</code></td>
+<td><code>status</code></td>
+<td>the type is not <code>none</code> and not <code>not_found</code></td>
+</tr>
+<tr>
+<td><code>is_regular_file</code></td>
+<td><code>status</code></td>
+<td>the type is <code>regular</code></td>
+</tr>
+<tr>
+<td><code>is_directory</code></td>
+<td><code>status</code></td>
+<td>the type is <code>directory</code></td>
+</tr>
+<tr>
+<td><code>is_block_file</code></td>
+<td><code>status</code></td>
+<td>the type is <code>block</code></td>
+</tr>
+<tr>
+<td><code>is_character_file</code></td>
+<td><code>status</code></td>
+<td>the type is <code>character</code></td>
+</tr>
+<tr>
+<td><code>is_fifo</code></td>
+<td><code>status</code></td>
+<td>the type is <code>fifo</code></td>
+</tr>
+<tr>
+<td><code>is_socket</code></td>
+<td><code>status</code></td>
+<td>the type is <code>socket</code></td>
+</tr>
+<tr>
+<td><code>is_other</code></td>
+<td><code>status</code></td>
+<td>the file exists and is not regular, not a directory and not a symlink</td>
+</tr>
+<tr>
+<td><code>is_symlink</code></td>
+<td><code>symlink_status</code></td>
+<td>the type is <code>symlink</code></td>
+</tr>
+<tr>
+<td><code>is_empty</code></td>
+<td><code>status</code>, then <code>list</code> or <code>file_size</code></td>
+<td>a directory has no entries, or a file has size 0</td>
+</tr>
+<tr>
+<td><code>relative</code></td>
+<td><code>weakly_canonical</code></td>
+<td>see below</td>
+</tr>
+<tr>
+<td><code>proximate</code></td>
+<td><code>weakly_canonical</code></td>
+<td>see below</td>
+</tr>
+</tbody>
+</table>
+<p>All of them are <code>inline</code> and take <code>const filesystem_t&amp;</code> and <code>const path_t&amp;</code>. A missing member that the query needs throws <code>std::bad_function_call</code>.</p>
+<h2 id="status-and-symlink_status">status and symlink_status<a class="headerlink" href="#status-and-symlink_status" title="Permanent link">&para;</a></h2>
+<p><code>status</code> follows a symlink and tells what the link points to. <code>symlink_status</code> does not follow it and tells what the link is. All the type queries except <code>is_symlink</code> use <code>status</code>:</p>
+<pre><code class="language-cpp">virtual_filesystem::filesystem_t filesystem;
+filesystem.status = [](const virtual_filesystem::path_t&amp;)
+{
+    return fs::file_status{fs::file_type::regular};
+};
+filesystem.symlink_status = [](const virtual_filesystem::path_t&amp;)
+{
+    return fs::file_status{fs::file_type::symlink};
+};
+
+virtual_filesystem::is_regular_file(filesystem, &quot;l&quot;);  // true: a link to a regular file
+virtual_filesystem::is_symlink(filesystem, &quot;l&quot;);       // true: and it is a link
+</code></pre>
+<p>This is one file and two answers, which is what a real symlink looks like. To build it on a disk you would need a user that is allowed to create symlinks.</p>
+<h2 id="is_empty">is_empty<a class="headerlink" href="#is_empty" title="Permanent link">&para;</a></h2>
+<p><code>is_empty</code> asks <code>status</code> first.</p>
+<ul>
+<li>A <strong>directory</strong> is empty when <code>list({.root = path})</code> has no entries. The list is not recursive, and it is the call that a logger and a fake see.</li>
+<li>Anything else is empty when <code>file_size(path)</code> is 0.</li>
+</ul>
+<pre><code class="language-cpp">virtual_filesystem::filesystem_t filesystem;
+filesystem.status = [](const virtual_filesystem::path_t&amp;)
+{
+    return fs::file_status{fs::file_type::directory};
+};
+filesystem.list = [](const virtual_filesystem::list_t&amp;)
+{
+    return virtual_filesystem::entries_t{};
+};
+
+virtual_filesystem::is_empty(filesystem, &quot;d&quot;);  // true
+</code></pre>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>A missing path is not a directory, so <code>is_empty</code> calls <code>file_size</code>. On a filesystem from <code>make_filesystem</code> that fails with <code>filesystem_error</code>; if <code>on_error</code> returns, <code>file_size</code> returns 0 and <code>is_empty</code> answers <code>true</code>. Check <code>exists</code> first when "missing" must be different from "empty".</p>
+</div>
+<h2 id="relative-and-proximate">relative and proximate<a class="headerlink" href="#relative-and-proximate" title="Permanent link">&para;</a></h2>
+<p>Both make the two paths weakly canonical with the filesystem, and then cut the second from the first by their names only:</p>
+<pre><code class="language-cpp">// path relative to base
+path_t relative(const filesystem_t&amp;, const path_t&amp; path, const path_t&amp; base);
+
+// path proximate to base: the path itself, when there is no relative path
+path_t proximate(const filesystem_t&amp;, const path_t&amp; path, const path_t&amp; base);
+</code></pre>
+<p><code>relative</code> is <code>lexically_relative</code> of the canonical paths, <code>proximate</code> is <code>lexically_proximate</code>.</p>
+<pre><code class="language-cpp">virtual_filesystem::filesystem_t filesystem;
+filesystem.weakly_canonical = [](const virtual_filesystem::path_t&amp; path)
+{
+    return path;
+};
+
+relative(filesystem, &quot;/a/b/c&quot;, &quot;/a&quot;);    // &quot;b/c&quot;
+relative(filesystem, &quot;/x/y&quot;, &quot;/a&quot;);      // &quot;../x/y&quot;
+relative(filesystem, &quot;x/y&quot;, &quot;/a&quot;);       // &quot;&quot;: a relative path and an absolute base have no relative path
+proximate(filesystem, &quot;x/y&quot;, &quot;/a&quot;);      // &quot;x/y&quot;: the path itself
+</code></pre>
+<p>The fake <code>weakly_canonical</code> returns the path as it is, so the test does not depend on the disk. On the disk the paths are resolved first: symlinks are followed and <code>.</code> and <code>..</code> are removed, so two names of one place give one answer.</p>
+<h2 id="errors">Errors<a class="headerlink" href="#errors" title="Permanent link">&para;</a></h2>
+<p>The queries do not catch anything. A member that throws <code>filesystem_error</code> makes the query throw it. With a filesystem from <code>make_filesystem</code> the member does not throw: it logs, calls <code>on_error</code>, and returns an empty result. See <a href="../errors/">Errors and logging</a>.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../errors/" class="btn btn-neutral float-left" title="Errors and logging"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../list/" class="btn btn-neutral float-right" title="Listing a directory">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p>Distributed under the Boost Software License, Version 1.0.</p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/goloveshin/virtual_filesystem_doc" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../errors/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../list/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,64 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="content_filter" id="content_filter">
+    <mxGraphModel dx="900" dy="500" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="440" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="Where content_filter runs" style="text;html=1;fontSize=18;align=left;verticalAlign=middle;whiteSpace=nowrap;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="12" width="700" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="lw" value="write" style="text;html=1;fontSize=16;align=left;verticalAlign=middle;whiteSpace=nowrap;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="54" width="300" height="28" as="geometry"/>
+        </mxCell>
+        <mxCell id="w1" value="filesystem.write(&lt;br&gt;{path, bytes})" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="30" y="88" width="240" height="76" as="geometry"/>
+        </mxCell>
+        <mxCell id="w2" value="content_filter(&lt;br&gt;path, bytes, WRITE)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="330" y="88" width="240" height="76" as="geometry"/>
+        </mxCell>
+        <mxCell id="w3" value="the file gets the bytes that the filter returned" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="630" y="88" width="240" height="76" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1" style="endArrow=classic;html=1;strokeWidth=1.5;" edge="1" parent="1" source="w1" target="w2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2" style="endArrow=classic;html=1;strokeWidth=1.5;" edge="1" parent="1" source="w2" target="w3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="lr" value="read, try_read" style="text;html=1;fontSize=16;align=left;verticalAlign=middle;whiteSpace=nowrap;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="184" width="300" height="28" as="geometry"/>
+        </mxCell>
+        <mxCell id="r1" value="the bytes of the file" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="30" y="218" width="240" height="76" as="geometry"/>
+        </mxCell>
+        <mxCell id="r2" value="content_filter(&lt;br&gt;path, bytes, READ)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="330" y="218" width="240" height="76" as="geometry"/>
+        </mxCell>
+        <mxCell id="r3" value="read or try_read returns what the filter returned" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="630" y="218" width="240" height="76" as="geometry"/>
+        </mxCell>
+        <mxCell id="e3" style="endArrow=classic;html=1;strokeWidth=1.5;" edge="1" parent="1" source="r1" target="r2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e4" style="endArrow=classic;html=1;strokeWidth=1.5;" edge="1" parent="1" source="r2" target="r3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="lm" value="try_read, the file cannot be opened" style="text;html=1;fontSize=16;align=left;verticalAlign=middle;whiteSpace=nowrap;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="314" width="500" height="28" as="geometry"/>
+        </mxCell>
+        <mxCell id="m1" value="filesystem.try_read(&lt;br&gt;path)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="30" y="348" width="240" height="76" as="geometry"/>
+        </mxCell>
+        <mxCell id="m2" value="an empty optional, not an error" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="630" y="348" width="240" height="76" as="geometry"/>
+        </mxCell>
+        <mxCell id="e5" style="endArrow=classic;html=1;strokeWidth=1.5;dashed=1;" edge="1" parent="1" source="m1" target="m2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="l5" value="the filter is not called" style="text;html=1;fontSize=16;align=center;verticalAlign=bottom;whiteSpace=nowrap;" vertex="1" parent="1">
+          <mxGeometry x="275" y="360" width="350" height="22" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

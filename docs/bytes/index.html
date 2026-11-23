@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://goloveshin.github.io/virtual_filesystem_doc/bytes/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>File bytes and content_filter - virtual_filesystem</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "File bytes and content_filter";
+        var mkdocs_page_input_path = "bytes.md";
+        var mkdocs_page_url = "/virtual_filesystem_doc/bytes/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> virtual_filesystem
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">The problem</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Getting started</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guide</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../faking/">Replacing calls in a test</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../errors/">Errors and logging</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../queries/">Queries</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../list/">Listing a directory</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">File bytes and content_filter</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#try_read-read-and-write">try_read, read and write</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#content_filter">content_filter</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#with-make_filesystem">With make_filesystem</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#with-a-filesystem-you-built">With a filesystem you built</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#details">Details</a>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../reference/">Reference</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">virtual_filesystem</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Guide</li>
+      <li class="breadcrumb-item active">File bytes and content_filter</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="file-bytes-and-content_filter">File bytes and content_filter<a class="headerlink" href="#file-bytes-and-content_filter" title="Permanent link">&para;</a></h1>
+<p><code>std::filesystem</code> knows about files, not about their contents. The code that reads a file uses <code>std::ifstream</code>, and a test cannot replace that. So <code>filesystem_t</code> has three members for the bytes of a file, and one function that can change the bytes on the way.</p>
+<pre><code class="language-cpp">using bytes_t = std::string;
+using bytes_ot = std::optional&lt;bytes_t&gt;;
+
+using try_read_ft = std::function&lt;bytes_ot (const path_t&amp;)&gt;;
+using read_ft = std::function&lt;bytes_t (const path_t&amp;)&gt;;
+using write_ft = std::function&lt;void (const write_t&amp;)&gt;;
+
+struct write_t
+{
+    path_t path;
+    bytes_t bytes;
+};
+</code></pre>
+<p>The bytes are a <code>std::string</code>. The files are opened in binary mode, so nothing is translated.</p>
+<h2 id="try_read-read-and-write">try_read, read and write<a class="headerlink" href="#try_read-read-and-write" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>member</th>
+<th>does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>try_read(path)</code></td>
+<td>returns the bytes, or an empty optional when the file cannot be opened. That is <strong>not an error</strong>: <code>on_error</code> does not run</td>
+</tr>
+<tr>
+<td><code>read(path)</code></td>
+<td>returns the bytes. When the file cannot be opened it is an error: <code>filesystem_error</code> goes to <code>on_error</code></td>
+</tr>
+<tr>
+<td><code>write({.path, .bytes})</code></td>
+<td>replaces the bytes of the file. The file is created, or truncated if it exists</td>
+</tr>
+</tbody>
+</table>
+<p>Use <code>try_read</code> when a missing file is normal, for example an optional config. Use <code>read</code> when a missing file is a failure.</p>
+<pre><code class="language-cpp">// the text of dir/config.txt, or an empty string when there is none
+filesystem.try_read(dir / &quot;config.txt&quot;).value_or(&quot;&quot;);
+</code></pre>
+<p>An empty optional is different from an empty file: an empty file is <code>bytes_ot{""}</code>.</p>
+<h2 id="content_filter">content_filter<a class="headerlink" href="#content_filter" title="Permanent link">&para;</a></h2>
+<p><code>content_filter</code> is a function that gets the bytes on their way in and out of the filesystem and returns the bytes to use instead:</p>
+<pre><code class="language-cpp">enum class content_filter_direction_et
+{
+    READ,
+    WRITE
+};
+
+using content_filter_ft = std::function&lt;bytes_t (
+    const path_t&amp;,
+    const bytes_t&amp;,
+    content_filter_direction_et
+)&gt;;
+</code></pre>
+<p>The arguments are the path, the bytes, and the direction:</p>
+<table>
+<thead>
+<tr>
+<th>direction</th>
+<th>the bytes are</th>
+<th>the result is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>READ</code></td>
+<td>what the filesystem read from the file</td>
+<td>what <code>read</code> or <code>try_read</code> returns</td>
+</tr>
+<tr>
+<td><code>WRITE</code></td>
+<td>what the caller gave to <code>write</code></td>
+<td>what the filesystem writes to the file</td>
+</tr>
+</tbody>
+</table>
+<p>Use it for what must happen to every file: decoding, decrypting, converting line endings, removing a byte order mark. The code that calls <code>read</code> and <code>write</code> does not change.</p>
+<p>An empty <code>content_filter</code> leaves the bytes as they are.</p>
+<p><img alt="Where content_filter runs" src="../images/03_content_filter.svg" /></p>
+<h2 id="with-make_filesystem">With make_filesystem<a class="headerlink" href="#with-make_filesystem" title="Permanent link">&para;</a></h2>
+<p>Pass the filter to <code>make_filesystem</code>. It is applied to <code>try_read</code>, <code>read</code> and <code>write</code> before the filesystem is returned.</p>
+<p>This filter shifts every byte up by one on the way to the disk and down on the way back. The shift is a stand-in for real encryption:</p>
+<pre><code class="language-cpp">const auto filesystem = virtual_filesystem::make_filesystem({
+    .content_filter = [](
+        const virtual_filesystem::path_t&amp;,
+        const virtual_filesystem::bytes_t&amp; bytes,
+        const virtual_filesystem::content_filter_direction_et direction
+    )
+    {
+        const auto shift = direction == virtual_filesystem::content_filter_direction_et::WRITE ? 1 : -1;
+        auto result = bytes;
+        std::ranges::transform(result, result.begin(), [shift](const char c)
+        {
+            return static_cast&lt;char&gt;(c + shift);
+        });
+        return result;
+    }
+});
+
+filesystem.write({.path = file, .bytes = &quot;HAL&quot;});
+filesystem.read(file);      // &quot;HAL&quot;
+filesystem.try_read(file);  // &quot;HAL&quot;
+</code></pre>
+<p>A filesystem without the filter sees what is on the disk:</p>
+<pre><code class="language-cpp">const auto plain = virtual_filesystem::make_filesystem({});
+plain.read(file);           // &quot;IBM&quot;
+</code></pre>
+<h2 id="with-a-filesystem-you-built">With a filesystem you built<a class="headerlink" href="#with-a-filesystem-you-built" title="Permanent link">&para;</a></h2>
+<p>A <code>filesystem_t</code> that you filled by hand, for a test, has its <code>content_filter</code> set but not applied. Call <code>apply_content_filter</code> once. It wraps the three members of the filesystem:</p>
+<pre><code class="language-cpp">void apply_content_filter(filesystem_t&amp;);
+</code></pre>
+<pre><code class="language-cpp">virtual_filesystem::bytes_t on_disk = &quot;one\r\ntwo\r\n&quot;;
+
+virtual_filesystem::filesystem_t filesystem;
+filesystem.read = [&amp;](const virtual_filesystem::path_t&amp;)
+{
+    return on_disk;
+};
+filesystem.write = [&amp;](const virtual_filesystem::write_t&amp; args)
+{
+    on_disk = args.bytes;
+};
+filesystem.content_filter = [](
+    const virtual_filesystem::path_t&amp;,
+    const virtual_filesystem::bytes_t&amp; bytes,
+    const virtual_filesystem::content_filter_direction_et direction
+)
+{
+    if (direction == virtual_filesystem::content_filter_direction_et::WRITE)
+    {
+        return bytes;
+    }
+    auto text = bytes;
+    std::erase(text, '\r');
+    return text;
+};
+
+virtual_filesystem::apply_content_filter(filesystem);
+
+filesystem.read(&quot;notes.txt&quot;);  // &quot;one\ntwo\n&quot;: the carriage returns are gone
+</code></pre>
+<p>The test checks the filter without any file: the fake <code>read</code> returns what the "disk" holds, and the filter turns it into what the code sees.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code>apply_content_filter</code> wraps what the members are at the moment of the call. Call it once. A second call wraps the wrapped members, and the filter runs twice. <code>make_filesystem</code> already calls it, so do not call it again on its result.</p>
+</div>
+<h2 id="details">Details<a class="headerlink" href="#details" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>try_read</code> calls the filter <strong>only when it has bytes</strong>. A missing file stays an empty optional and the filter is not called.</li>
+<li>The filter wraps the members from the outside. An exception from the filter leaves the call; <code>on_error</code> does not see it.</li>
+<li>If <code>read</code> fails and <code>on_error</code> returns, <code>read</code> returns empty bytes and the filter is called with them.</li>
+<li>The filter sees every file the same way. Look at the path when files differ.</li>
+<li>The logger sees <code>TRY_READ</code>, <code>READ</code> and <code>WRITE</code>. The filter is not a call of its own and is not logged.</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../list/" class="btn btn-neutral float-left" title="Listing a directory"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../reference/" class="btn btn-neutral float-right" title="Reference">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p>Distributed under the Boost Software License, Version 1.0.</p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/goloveshin/virtual_filesystem_doc" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../list/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../reference/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

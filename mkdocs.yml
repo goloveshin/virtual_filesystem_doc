@@ -1,0 +1,29 @@
+site_name: virtual_filesystem
+site_description: A std::function stand-in for std::filesystem, so that a test can replace any call
+site_url: https://goloveshin.github.io/virtual_filesystem_doc/
+repo_url: https://github.com/goloveshin/virtual_filesystem_doc
+edit_uri: ''
+copyright: Distributed under the Boost Software License, Version 1.0.
+
+docs_dir: source
+site_dir: docs
+
+theme:
+  name: readthedocs
+  navigation_depth: 3
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+
+nav:
+  - The problem: index.md
+  - Getting started: getting-started.md
+  - Guide:
+      - Replacing calls in a test: faking.md
+      - Errors and logging: errors.md
+      - Queries: queries.md
+      - Listing a directory: list.md
+      - File bytes and content_filter: bytes.md
+  - Reference: reference.md

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://goloveshin.github.io/virtual_filesystem_doc/list/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Listing a directory - virtual_filesystem</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Listing a directory";
+        var mkdocs_page_input_path = "list.md";
+        var mkdocs_page_url = "/virtual_filesystem_doc/list/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> virtual_filesystem
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">The problem</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Getting started</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guide</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../faking/">Replacing calls in a test</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../errors/">Errors and logging</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../queries/">Queries</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Listing a directory</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#arguments">Arguments</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#the-result">The result</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#code-under-test">Code under test</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#a-fake-list">A fake list</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#errors">Errors</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../bytes/">File bytes and content_filter</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../reference/">Reference</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">virtual_filesystem</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Guide</li>
+      <li class="breadcrumb-item active">Listing a directory</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="listing-a-directory">Listing a directory<a class="headerlink" href="#listing-a-directory" title="Permanent link">&para;</a></h1>
+<p><code>list</code> returns the entries of a directory in one vector. It replaces both <code>std::filesystem::directory_iterator</code> and <code>recursive_directory_iterator</code>.</p>
+<pre><code class="language-cpp">struct list_options_t
+{
+    bool recursive = false;
+    bool follow_directory_symlink = false;
+    bool skip_permission_denied = false;
+};
+
+struct list_t
+{
+    path_t root;
+    list_options_t options = {};
+};
+
+using list_ft = std::function&lt;entries_t (const list_t&amp;)&gt;;
+</code></pre>
+<h2 id="arguments">Arguments<a class="headerlink" href="#arguments" title="Permanent link">&para;</a></h2>
+<p><code>root</code> is the directory. <code>options</code> selects how to walk it:</p>
+<table>
+<thead>
+<tr>
+<th>option</th>
+<th>meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>recursive</code></td>
+<td>go into subdirectories. The default is the entries of <code>root</code> only</td>
+</tr>
+<tr>
+<td><code>follow_directory_symlink</code></td>
+<td>go into a symlink to a directory. It has an effect only with <code>recursive</code></td>
+</tr>
+<tr>
+<td><code>skip_permission_denied</code></td>
+<td>skip a directory that cannot be opened, instead of an error</td>
+</tr>
+</tbody>
+</table>
+<p>The last two are <code>std::filesystem::directory_options</code> of the same names.</p>
+<p>The call takes one struct, so a call site names what it sets:</p>
+<pre><code class="language-cpp">const auto entries = filesystem.list({
+    .root = root,
+    .options = {.recursive = true}
+});
+</code></pre>
+<h2 id="the-result">The result<a class="headerlink" href="#the-result" title="Permanent link">&para;</a></h2>
+<pre><code class="language-cpp">struct entry_t
+{
+    path_t path;
+    fs::file_status status;
+    fs::file_status symlink_status;
+};
+using entries_t = std::vector&lt;entry_t&gt;;
+</code></pre>
+<p>An entry is a <strong>snapshot</strong>. <code>status</code> and <code>symlink_status</code> are captured when the directory is listed, so the code that goes through the entries does not ask the filesystem again. In <code>std::filesystem</code> the same questions to <code>directory_entry</code> can touch the disk and can fail.</p>
+<p><code>status</code> follows a symlink and <code>symlink_status</code> does not, the same as in the <a href="../queries/">queries</a>.</p>
+<p>The order of the entries is the order of the directory. It is not sorted. Sort the result when the order matters.</p>
+<h2 id="code-under-test">Code under test<a class="headerlink" href="#code-under-test" title="Permanent link">&para;</a></h2>
+<p><code>source_files</code> of the example takes the <code>.cpp</code> files under a root:</p>
+<pre><code class="language-cpp">inline std::vector&lt;std::string&gt; source_files(
+    const virtual_filesystem::filesystem_t&amp; filesystem,
+    const virtual_filesystem::path_t&amp; root
+)
+{
+    namespace fs = virtual_filesystem::fs;
+
+    const auto entries = filesystem.list({
+        .root = root,
+        .options = {.recursive = true}
+    });
+
+    std::vector&lt;std::string&gt; result;
+    for (const auto&amp; entry : entries)
+    {
+        if (entry.status.type() == fs::file_type::regular &amp;&amp; entry.path.extension() == &quot;.cpp&quot;)
+        {
+            result.push_back(entry.path.generic_string());
+        }
+    }
+    std::ranges::sort(result);
+    return result;
+}
+</code></pre>
+<h2 id="a-fake-list">A fake list<a class="headerlink" href="#a-fake-list" title="Permanent link">&para;</a></h2>
+<p>A test sets <code>list</code> and nothing else. The entries carry their own status, so no <code>status</code> fake is needed:</p>
+<pre><code class="language-cpp">virtual_filesystem::filesystem_t filesystem;
+filesystem.list = [](const virtual_filesystem::list_t&amp; args)
+{
+    const auto regular = fs::file_status{fs::file_type::regular};
+    return virtual_filesystem::entries_t{
+        {.path = args.root / &quot;a.cpp&quot;, .status = regular, .symlink_status = regular},
+        {.path = args.root / &quot;b.hpp&quot;, .status = regular, .symlink_status = regular},
+        {.path = args.root / &quot;sub&quot; / &quot;c.cpp&quot;, .status = regular, .symlink_status = regular}
+    };
+};
+
+example::source_files(filesystem, &quot;src&quot;);  // {&quot;src/a.cpp&quot;, &quot;src/sub/c.cpp&quot;}
+</code></pre>
+<p>The memory filesystem of the example (<code>memory_t</code>) fills <code>list</code> from its files too, and honors <code>recursive</code>. See <a href="../faking/">Replacing calls in a test</a>.</p>
+<h2 id="errors">Errors<a class="headerlink" href="#errors" title="Permanent link">&para;</a></h2>
+<p>If the directory cannot be opened or is not a directory, <code>std::filesystem</code> throws <code>filesystem_error</code>. With a filesystem from <code>make_filesystem</code> it goes to <code>on_error</code>, and the result is an empty vector:</p>
+<pre><code class="language-cpp">const auto filesystem = virtual_filesystem::make_filesystem({});
+filesystem.list({.root = &quot;missing_dir&quot;}).size();  // 0
+</code></pre>
+<p>An error in the middle of a walk, for example a directory that cannot be opened without <code>skip_permission_denied</code>, also ends the call, and entries found before the error are not returned.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../queries/" class="btn btn-neutral float-left" title="Queries"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../bytes/" class="btn btn-neutral float-right" title="File bytes and content_filter">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p>Distributed under the Boost Software License, Version 1.0.</p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/goloveshin/virtual_filesystem_doc" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../queries/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../bytes/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="description" content="A std::function stand-in for std::filesystem, so that a test can replace any call" /><link rel="canonical" href="https://goloveshin.github.io/virtual_filesystem_doc/" />
+      <link rel="shortcut icon" href="img/favicon.ico" />
+    <title>virtual_filesystem</title>
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "The problem";
+        var mkdocs_page_input_path = "index.md";
+        var mkdocs_page_url = "/virtual_filesystem_doc/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="." class="icon icon-home"> virtual_filesystem
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">The problem</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#the-problem">The problem</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#what-the-library-does">What the library does</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#how-this-documentation-is-arranged">How this documentation is arranged</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="getting-started/">Getting started</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guide</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="faking/">Replacing calls in a test</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="errors/">Errors and logging</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="queries/">Queries</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="list/">Listing a directory</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="bytes/">File bytes and content_filter</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="reference/">Reference</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href=".">virtual_filesystem</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">The problem</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="a-filesystem-you-can-replace-in-a-test">A filesystem you can replace in a test<a class="headerlink" href="#a-filesystem-you-can-replace-in-a-test" title="Permanent link">&para;</a></h1>
+<h2 id="the-problem">The problem<a class="headerlink" href="#the-problem" title="Permanent link">&para;</a></h2>
+<p><a href="https://en.cppreference.com/w/cpp/filesystem"><code>std::filesystem</code></a> is a set of free functions. Code that calls them talks to the real disk, and there is no place to put anything between the code and the disk.</p>
+<pre><code class="language-cpp">bool has_config(const std::filesystem::path&amp; dir)
+{
+    return std::filesystem::is_regular_file(dir / &quot;config.txt&quot;);
+}
+</code></pre>
+<p>A test of this function needs a real directory with a real file. That has a price:</p>
+<ul>
+<li><strong>Tests touch the disk.</strong> They need a temporary directory, clean-up, and care about parallel runs.</li>
+<li><strong>Failures are hard to make.</strong> To test "permission denied" or "disk is full" you must arrange them on a real machine.</li>
+<li><strong>Errors are everywhere.</strong> Most functions throw <code>std::filesystem::filesystem_error</code>, and every function has a second overload with <code>std::error_code</code>. Each call site picks one of two styles and repeats it.</li>
+<li><strong>No view of the calls.</strong> You cannot ask "which paths did this code touch?" without a debugger.</li>
+<li><strong>The bytes of a file are not covered.</strong> <code>std::filesystem</code> knows about files, but not about reading or writing them. The code that reads a file uses <code>std::ifstream</code>, which is another thing a test cannot replace.</li>
+</ul>
+<h2 id="what-the-library-does">What the library does<a class="headerlink" href="#what-the-library-does" title="Permanent link">&para;</a></h2>
+<p><code>virtual_filesystem::filesystem_t</code> is a struct. Every member is a <code>std::function</code>, and every member is one operation that a filesystem must answer: <code>status</code>, <code>file_size</code>, <code>rename</code>, <code>list</code>, <code>read</code>, <code>write</code> and so on.</p>
+<p>Production code takes a <code>const filesystem_t&amp;</code> and calls its members:</p>
+<pre><code class="language-cpp">bool has_config(
+    const virtual_filesystem::filesystem_t&amp; filesystem,
+    const virtual_filesystem::path_t&amp; dir
+)
+{
+    return virtual_filesystem::is_regular_file(filesystem, dir / &quot;config.txt&quot;);
+}
+</code></pre>
+<p>In the program the filesystem is made from <code>std::filesystem</code>:</p>
+<pre><code class="language-cpp">const auto filesystem = virtual_filesystem::make_filesystem({});
+</code></pre>
+<p>In a test any member is replaced by a function that answers what the test needs:</p>
+<pre><code class="language-cpp">virtual_filesystem::filesystem_t filesystem;
+filesystem.status = [](const virtual_filesystem::path_t&amp;)
+{
+    return std::filesystem::file_status{std::filesystem::file_type::regular};
+};
+</code></pre>
+<p><img alt="The code under test sees only filesystem_t" src="images/01_seam.svg" /></p>
+<p>What you get:</p>
+<ul>
+<li><strong>A seam.</strong> The code under test sees <code>filesystem_t</code> and does not know what is behind it.</li>
+<li><strong>A fake per member.</strong> A test sets only the members the code under test calls.</li>
+<li><strong>One error policy.</strong> <code>make_filesystem</code> catches <code>filesystem_error</code> and hands it to one function, <code>on_error</code>. The call does not throw unless that function does.</li>
+<li><strong>A log of calls.</strong> A <code>logger</code> function sees every call, with its paths, before it runs.</li>
+<li><strong>Rules that cannot disagree with a fake.</strong> <code>exists</code>, <code>is_directory</code>, <code>is_empty</code>, <code>relative</code> and the other queries are free functions built on the members. A fake <code>status</code> changes what they answer.</li>
+<li><strong>File bytes.</strong> <code>try_read</code>, <code>read</code> and <code>write</code> are members too, and a <code>content_filter</code> can change the bytes on the way in and out.</li>
+</ul>
+<p>It is a thin layer. It adds no files and no state of its own: <code>make_filesystem</code> forwards each call to <code>std::filesystem</code>.</p>
+<h2 id="how-this-documentation-is-arranged">How this documentation is arranged<a class="headerlink" href="#how-this-documentation-is-arranged" title="Permanent link">&para;</a></h2>
+<ol>
+<li><a href="getting-started/">Getting started</a>: requirements, CMake and a first program.</li>
+<li>The guide:<ul>
+<li><a href="faking/">Replacing calls in a test</a>: fakes, partial fakes and failing fakes.</li>
+<li><a href="errors/">Errors and logging</a>: <code>logger</code>, <code>on_error</code> and the value you get back.</li>
+<li><a href="queries/">Queries</a>: the rules built on the members.</li>
+<li><a href="list/">Listing a directory</a>: <code>list</code> and its options.</li>
+<li><a href="bytes/">File bytes and content_filter</a>: <code>try_read</code>, <code>read</code>, <code>write</code> and the filter.</li>
+</ul>
+</li>
+<li><a href="reference/">Reference</a>: every function, type and enumeration.</li>
+</ol>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="getting-started/" class="btn btn-neutral float-right" title="Getting started">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p>Distributed under the Boost Software License, Version 1.0.</p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/goloveshin/virtual_filesystem_doc" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+    
+      <span><a href="getting-started/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = ".";</script>
+    <script src="js/theme_extra.js"></script>
+    <script src="js/theme.js"></script>
+      <script src="search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 1.6.1
+Build Date UTC : 2026-11-23 13:40:31.580155+00:00
+-->

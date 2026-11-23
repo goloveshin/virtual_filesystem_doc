@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://goloveshin.github.io/virtual_filesystem_doc/</loc>
+         <lastmod>2026-11-23</lastmod>
+    </url>
+    <url>
+         <loc>https://goloveshin.github.io/virtual_filesystem_doc/bytes/</loc>
+         <lastmod>2026-11-23</lastmod>
+    </url>
+    <url>
+         <loc>https://goloveshin.github.io/virtual_filesystem_doc/errors/</loc>
+         <lastmod>2026-11-23</lastmod>
+    </url>
+    <url>
+         <loc>https://goloveshin.github.io/virtual_filesystem_doc/faking/</loc>
+         <lastmod>2026-11-23</lastmod>
+    </url>
+    <url>
+         <loc>https://goloveshin.github.io/virtual_filesystem_doc/getting-started/</loc>
+         <lastmod>2026-11-23</lastmod>
+    </url>
+    <url>
+         <loc>https://goloveshin.github.io/virtual_filesystem_doc/list/</loc>
+         <lastmod>2026-11-23</lastmod>
+    </url>
+    <url>
+         <loc>https://goloveshin.github.io/virtual_filesystem_doc/queries/</loc>
+         <lastmod>2026-11-23</lastmod>
+    </url>
+    <url>
+         <loc>https://goloveshin.github.io/virtual_filesystem_doc/reference/</loc>
+         <lastmod>2026-11-23</lastmod>
+    </url>
+</urlset>

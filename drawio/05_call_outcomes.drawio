@@ -1,0 +1,43 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="call_outcomes" id="call_outcomes">
+    <mxGraphModel dx="900" dy="500" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="920" pageHeight="520" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="The same call meets three kinds of member" style="text;html=1;fontSize=18;align=left;verticalAlign=middle;whiteSpace=nowrap;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="12" width="700" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="code" value="code under test&lt;br&gt;has_config(&lt;br&gt;filesystem, dir)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="20" y="190" width="200" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="member" value="filesystem.status(path)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="270" y="200" width="220" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="o1" value="&lt;b&gt;status is a fake that answers&lt;/b&gt;&lt;br&gt;file_status regular or not_found&lt;br&gt;has_config returns true or false" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="570" y="50" width="330" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="o2" value="&lt;b&gt;status is empty&lt;/b&gt;&lt;br&gt;std::bad_function_call&lt;br&gt;the test fails at the unexpected call" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="570" y="180" width="330" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="o3" value="&lt;b&gt;status is a fake that throws&lt;/b&gt;&lt;br&gt;filesystem_error, for example permission_denied; it reaches the caller of has_config" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="570" y="310" width="330" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="e0" style="endArrow=classic;html=1;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="code" target="member">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=classic;html=1;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="member" target="o1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=classic;html=1;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="member" target="o2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=classic;html=1;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="member" target="o3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="n" value="A fake covers only what the test needs. An unexpected call fails loudly instead of returning a made-up answer." style="text;html=1;fontSize=16;align=left;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="30" y="450" width="870" height="50" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
